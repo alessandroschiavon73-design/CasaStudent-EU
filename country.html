@@ -1,1 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CasaStudent Europe</title><meta name="description" content="Student housing by country and city across Europe."><link rel="stylesheet" href="assets/css/style.css"></head><body><header class="site-header"><div class="shell"><a class="brand" href="/"><span class="brand-main">Casa<strong>Student</strong></span><small>Base & Belong</small></a></div></header><main><section class="hero"><div class="shell"><div class="eyebrow">CasaStudent Europe</div><h1 id="countryTitle">Student housing in Europe</h1><p id="countryIntro">Choose a city to explore student housing opportunities.</p><div id="cityCards" class="country-grid"></div><p><a href="/">← Back to the European map</a></p></div></section></main><footer class="site-footer"><div class="shell"><div class="footer-links"><a href="https://casastudent.it/">Italy</a><a href="https://casastudent.es/">Spain</a><a href="https://casastudent.fr/">France</a><a href="https://casastudent.de/">Germany</a><a href="https://casastudent.pl/">Poland</a><a href="/">Europe</a></div></div></footer><script src="assets/js/app.js"></script><script>(function(){const p=new URLSearchParams(location.search),code=p.get('country'),city=p.get('city'),names=window.CasaStudentEU.countryNames,cities=window.CasaStudentEU.countryCities;if(!code||!names[code])return;document.title=`CasaStudent ${names[code]} — Student housing`;document.querySelector('#countryTitle').textContent=city?`Student housing in ${city}`:`Student housing in ${names[code]}`;document.querySelector('#countryIntro').textContent=city?`CasaStudent Europe is preparing the ${city} marketplace for medium- and long-term student housing.`:`Explore the main university destinations in ${names[code]}. This country is hosted directly on CasaStudent.eu.`;const box=document.querySelector('#cityCards');(cities[code]||[]).forEach(c=>{const a=document.createElement('a');a.className='country-card';a.href=`country.html?country=${code}&city=${encodeURIComponent(c)}`;a.innerHTML=`<strong>${c}</strong><span>Student housing and Erasmus accommodation</span>`;box.appendChild(a)});if(!(cities[code]||[]).length)box.innerHTML='<div class="country-card"><strong>Coming soon</strong><span>This destination is already part of the CasaStudent Europe network and will be populated as the marketplace grows.</span></div>'})();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffc400">
+  <title>European destination — CasaStudent Europe</title>
+  <meta name="description" content="Explore student housing destinations and university cities on CasaStudent Europe.">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260828-casastudent-eu">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="CasaStudent Europe home"><span class="brand-icon" aria-hidden="true"><span class="brand-cap">▰</span></span><span>Casa<strong>Student</strong><small>Base &amp; Belong</small></span></a>
+      <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" data-menu-toggle>☰</button>
+      <nav class="main-nav" aria-label="Main navigation" data-main-nav><a href="index.html#how">How it works</a><a href="index.html#destinations">Destinations</a><a href="index.html#faq">FAQ</a><a class="header-cta" href="index.html#map">European map</a></nav>
+    </div>
+  </header>
+  <main>
+    <div class="breadcrumb"><div class="container"><a href="index.html">Europe</a><span>›</span><span id="breadcrumbCountry">Destination</span></div></div>
+    <section class="country-hero">
+      <div class="container country-hero-grid">
+        <div><span class="kicker">CasaStudent Europe destination</span><h1 id="countryTitle">Student housing in Europe</h1><p id="countryIntro">Choose a university city to continue.</p></div>
+        <a class="btn btn-white" href="index.html#map">← Back to the European map</a>
+      </div>
+    </section>
+    <section class="country-destinations">
+      <div class="container">
+        <div class="section-heading"><div><span class="kicker">University destinations</span><h2 id="cityHeading">Choose a city</h2></div><p>This country is hosted directly on CasaStudent.eu while the European network grows.</p></div>
+        <div class="city-grid" id="cityCards"></div>
+        <div class="country-note"><span aria-hidden="true">◎</span><div><strong>Part of one European CasaStudent network</strong><p>Clear destination structure today, ready for local listings and services as the market develops.</p></div></div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div><a class="footer-brand" href="index.html">Casa<strong>Student</strong></a><p>The European gateway for clear, local student housing destinations.</p></div>
+        <div><h3>Explore</h3><div class="footer-links"><a href="index.html#map">European map</a><a href="index.html#destinations">Destinations</a></div></div>
+        <div><h3>Project</h3><div class="footer-links"><a href="index.html#faq">FAQ</a><a href="mailto:info@casastudent.eu">Contact</a></div></div>
+      </div>
+      <div class="footer-international"><strong>CasaStudent in Europe</strong><div class="footer-country-links" id="footerNetwork"></div></div>
+      <div class="footer-bottom"><span>© 2026 CasaStudent</span><span>Europe · casastudent.eu</span></div>
+    </div>
+  </footer>
+  <script src="assets/js/app.js?v=20260828-casastudent-eu"></script>
+</body>
+</html>

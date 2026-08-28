@@ -1,80 +1,253 @@
-const strongSites={IT:'https://www.casastudent.it/',ES:'https://www.casastudent.es/',FR:'https://www.casastudent.fr/',DE:'https://www.casastudent.de/',PL:'https://www.casastudent.pl/'};
-const countryNames={IE:'Ireland',UK:'United Kingdom',PT:'Portugal',ES:'Spain',FR:'France',BE:'Belgium',NL:'Netherlands',DE:'Germany',DK:'Denmark',NO:'Norway',SE:'Sweden',FI:'Finland',PL:'Poland',CZ:'Czech Republic',AT:'Austria',CH:'Switzerland',IT:'Italy',SI:'Slovenia',HR:'Croatia',HU:'Hungary',SK:'Slovakia',RO:'Romania',BG:'Bulgaria',GR:'Greece',RS:'Serbia',EE:'Estonia',LV:'Latvia',LT:'Lithuania'};
-const countryCities={PT:['Lisbon','Porto','Coimbra','Braga'],NL:['Amsterdam','Rotterdam','Utrecht','Groningen'],BE:['Brussels','Leuven','Ghent','Antwerp'],AT:['Vienna','Graz','Innsbruck','Salzburg'],CZ:['Prague','Brno','Olomouc'],HU:['Budapest','Szeged','Debrecen'],GR:['Athens','Thessaloniki','Patras'],HR:['Zagreb','Split','Rijeka'],SI:['Ljubljana','Maribor'],IE:['Dublin','Cork','Galway'],DK:['Copenhagen','Aarhus','Odense'],SE:['Stockholm','Lund','Uppsala','Gothenburg'],FI:['Helsinki','Turku','Tampere'],NO:['Oslo','Bergen','Trondheim'],RO:['Bucharest','Cluj-Napoca','Timișoara'],BG:['Sofia','Plovdiv','Varna'],SK:['Bratislava','Košice'],EE:['Tallinn','Tartu'],LV:['Riga'],LT:['Vilnius','Kaunas'],RS:['Belgrade','Novi Sad'],CH:['Zurich','Geneva','Lausanne'],UK:['London','Manchester','Edinburgh','Bristol']};
-function countryHref(code){return strongSites[code]||`country.html?country=${code}`}
-document.querySelectorAll('[data-country]').forEach(el=>{const code=el.dataset.country;el.href=countryHref(code)});
-const countrySelect=document.querySelector('#countrySelect');const citySelect=document.querySelector('#citySelect');const searchBtn=document.querySelector('#searchBtn');
-if(countrySelect){Object.keys(countryNames).forEach(code=>{const o=document.createElement('option');o.value=code;o.textContent=countryNames[code];countrySelect.appendChild(o)});countrySelect.addEventListener('change',()=>{citySelect.innerHTML='<option value="">Select city</option>';(countryCities[countrySelect.value]||[]).forEach(city=>{const o=document.createElement('option');o.value=city;o.textContent=city;citySelect.appendChild(o)});citySelect.disabled=!(countryCities[countrySelect.value]||[]).length});}
-if(searchBtn)searchBtn.addEventListener('click',()=>{const code=countrySelect.value;if(!code)return;const base=countryHref(code);if(strongSites[code]){location.href=base;return}const city=citySelect.value;location.href=`country.html?country=${code}${city?`&city=${encodeURIComponent(city)}`:''}`});
-
-const numericToCode={
-  '372':'IE','826':'UK','620':'PT','724':'ES','250':'FR','56':'BE','528':'NL','276':'DE','208':'DK','578':'NO','752':'SE','246':'FI','616':'PL','203':'CZ','40':'AT','756':'CH','380':'IT','705':'SI','191':'HR','348':'HU','703':'SK','642':'RO','100':'BG','300':'GR','688':'RS','233':'EE','428':'LV','440':'LT'
+const nationalPortals = {
+  IT: "https://casastudent.it/",
+  ES: "https://casastudent.es/",
+  FR: "https://casastudent.fr/",
+  DE: "https://casastudent.de/",
+  PL: "https://casastudent.pl/"
 };
 
-function loadScript(src,key){
-  if(document.querySelector(`script[data-map-lib="${key}"]`)) return Promise.resolve();
-  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.async=true;s.dataset.mapLib=key;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
+const countryNames = {
+  IE: "Ireland",
+  UK: "United Kingdom",
+  PT: "Portugal",
+  ES: "Spain",
+  FR: "France",
+  BE: "Belgium",
+  NL: "Netherlands",
+  DE: "Germany",
+  DK: "Denmark",
+  NO: "Norway",
+  SE: "Sweden",
+  FI: "Finland",
+  PL: "Poland",
+  CZ: "Czechia",
+  AT: "Austria",
+  CH: "Switzerland",
+  IT: "Italy",
+  HU: "Hungary",
+  SK: "Slovakia",
+  RO: "Romania",
+  BG: "Bulgaria",
+  GR: "Greece",
+  EE: "Estonia",
+  LV: "Latvia",
+  LT: "Lithuania"
+};
+
+const countryFlags = {
+  IE: "🇮🇪", UK: "🇬🇧", PT: "🇵🇹", ES: "🇪🇸", FR: "🇫🇷",
+  BE: "🇧🇪", NL: "🇳🇱", DE: "🇩🇪", DK: "🇩🇰", NO: "🇳🇴",
+  SE: "🇸🇪", FI: "🇫🇮", PL: "🇵🇱", CZ: "🇨🇿", AT: "🇦🇹",
+  CH: "🇨🇭", IT: "🇮🇹", HU: "🇭🇺", SK: "🇸🇰", RO: "🇷🇴",
+  BG: "🇧🇬", GR: "🇬🇷", EE: "🇪🇪", LV: "🇱🇻", LT: "🇱🇹"
+};
+
+const countryCities = {
+  IE: ["Dublin", "Cork", "Galway", "Limerick"],
+  UK: ["London", "Manchester", "Edinburgh", "Bristol", "Leeds"],
+  PT: ["Lisbon", "Porto", "Coimbra", "Braga", "Aveiro", "Faro"],
+  BE: ["Brussels", "Leuven", "Ghent", "Antwerp", "Liège"],
+  NL: ["Amsterdam", "Rotterdam", "Utrecht", "Groningen", "Leiden"],
+  DK: ["Copenhagen", "Aarhus", "Odense", "Aalborg"],
+  NO: ["Oslo", "Bergen", "Trondheim", "Stavanger"],
+  SE: ["Stockholm", "Lund", "Uppsala", "Gothenburg", "Malmö"],
+  FI: ["Helsinki", "Turku", "Tampere", "Oulu"],
+  CZ: ["Prague", "Brno", "Olomouc", "Ostrava"],
+  AT: ["Vienna", "Graz", "Innsbruck", "Salzburg", "Linz"],
+  CH: ["Zurich", "Geneva", "Lausanne", "Basel", "Bern"],
+  HU: ["Budapest", "Szeged", "Debrecen", "Pécs"],
+  SK: ["Bratislava", "Košice", "Žilina"],
+  RO: ["Bucharest", "Cluj-Napoca", "Timișoara", "Iași", "Brașov"],
+  BG: ["Sofia", "Plovdiv", "Varna", "Veliko Tarnovo"],
+  GR: ["Athens", "Thessaloniki", "Patras", "Heraklion", "Ioannina"],
+  EE: ["Tallinn", "Tartu"],
+  LV: ["Riga", "Daugavpils"],
+  LT: ["Vilnius", "Kaunas", "Klaipėda"]
+};
+
+const countryOrder = [
+  "IE", "UK", "PT", "ES", "FR", "BE", "NL", "DE", "DK", "NO",
+  "SE", "FI", "PL", "CZ", "AT", "CH", "IT", "HU", "SK", "RO",
+  "BG", "GR", "EE", "LV", "LT"
+];
+const portalOrder = ["IT", "ES", "FR", "DE", "PL"];
+const europeanOrder = countryOrder.filter((code) => !nationalPortals[code]);
+
+function destinationHref(code, city = "") {
+  if (nationalPortals[code]) return nationalPortals[code];
+  const cityQuery = city ? `&city=${encodeURIComponent(city)}` : "";
+  return `country.html?country=${code}${cityQuery}`;
 }
 
-async function renderEuropeMap(){
-  const container=document.querySelector('.europe-map');
-  if(!container)return;
-  try{
-    await loadScript('https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js','d3');
-    await loadScript('https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js','topojson');
-    const response=await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json',{cache:'force-cache'});
-    if(!response.ok)throw new Error('Map data unavailable');
-    const atlas=await response.json();
-    const all=topojson.feature(atlas,atlas.objects.countries).features;
-    const features=all.filter(f=>numericToCode[String(Number(f.id))]);
-    if(!features.length)throw new Error('No European geometry');
+function citySummary(code) {
+  return (countryCities[code] || []).slice(0, 3).join(", ");
+}
 
-    const width=Math.max(760,container.clientWidth||1000);
-    const height=620;
-    const svg=d3.create('svg').attr('viewBox',`0 0 ${width} ${height}`).attr('role','img').attr('aria-label','Interactive geographic map of Europe').attr('preserveAspectRatio','xMidYMid meet');
-    const projection=d3.geoMercator().fitExtent([[38,26],[width-38,height-34]],{type:'FeatureCollection',features});
-    const path=d3.geoPath(projection);
+function configureMenu() {
+  const button = document.querySelector("[data-menu-toggle]");
+  const nav = document.querySelector("[data-main-nav]");
+  if (!button || !nav) return;
+  button.addEventListener("click", () => {
+    const open = nav.classList.toggle("open");
+    button.setAttribute("aria-expanded", String(open));
+    button.textContent = open ? "×" : "☰";
+  });
+  nav.addEventListener("click", (event) => {
+    if (!event.target.closest("a") || window.innerWidth > 820) return;
+    nav.classList.remove("open");
+    button.setAttribute("aria-expanded", "false");
+    button.textContent = "☰";
+  });
+}
 
-    svg.append('path').datum({type:'Sphere'}).attr('class','map-ocean').attr('d',path);
-    svg.append('path').datum(d3.geoGraticule10()).attr('class','map-graticule').attr('d',path);
+function configureMap() {
+  document.querySelectorAll("[data-country]").forEach((hotspot) => {
+    const code = hotspot.dataset.country;
+    const portalText = nationalPortals[code] ? " — dedicated national portal" : " — explore on CasaStudent.eu";
+    hotspot.href = destinationHref(code);
+    hotspot.title = `${countryNames[code]}${portalText}`;
+    hotspot.setAttribute("aria-label", hotspot.title);
+  });
+}
 
-    const tooltip=document.createElement('div');
-    tooltip.className='map-tooltip';
-    tooltip.hidden=true;
-    container.appendChild(tooltip);
+function configureSearch() {
+  const form = document.querySelector("#destination-search");
+  const countrySelect = document.querySelector("#countrySelect");
+  const citySelect = document.querySelector("#citySelect");
+  const note = document.querySelector("#searchNote");
+  if (!form || !countrySelect || !citySelect) return;
 
-    const countries=svg.append('g').attr('class','map-countries');
-    countries.selectAll('path').data(features).join('path')
-      .attr('d',path)
-      .attr('class',d=>{const code=numericToCode[String(Number(d.id))];return `geo-country${strongSites[code]?' national':''}`})
-      .attr('tabindex',0)
-      .attr('role','link')
-      .attr('aria-label',d=>{const code=numericToCode[String(Number(d.id))];return `${countryNames[code]}${strongSites[code]?' — dedicated national CasaStudent portal':''}`})
-      .on('mouseenter focus',function(event,d){const code=numericToCode[String(Number(d.id))];d3.select(this).classed('active',true);tooltip.hidden=false;tooltip.innerHTML=`<strong>${countryNames[code]}</strong><span>${strongSites[code]?'Dedicated CasaStudent portal':'Explore student cities'}</span>`})
-      .on('mousemove',function(event){const box=container.getBoundingClientRect();tooltip.style.left=`${Math.min(event.clientX-box.left+14,box.width-190)}px`;tooltip.style.top=`${Math.max(event.clientY-box.top-48,10)}px`})
-      .on('mouseleave blur',function(){d3.select(this).classed('active',false);tooltip.hidden=true})
-      .on('click',function(event,d){const code=numericToCode[String(Number(d.id))];location.href=countryHref(code)})
-      .on('keydown',function(event,d){if(event.key==='Enter'||event.key===' '){event.preventDefault();const code=numericToCode[String(Number(d.id))];location.href=countryHref(code)}});
+  countryOrder.forEach((code) => {
+    const option = document.createElement("option");
+    option.value = code;
+    option.textContent = `${countryFlags[code]} ${countryNames[code]}`;
+    countrySelect.appendChild(option);
+  });
 
-    const labelCodes=new Set(['IT','ES','FR','DE','PL','PT','NL','BE','AT','CZ','HU','GR','UK','IE','SE','NO','FI','RO']);
-    svg.append('g').attr('class','map-labels').selectAll('text').data(features.filter(d=>labelCodes.has(numericToCode[String(Number(d.id))]))).join('text')
-      .attr('x',d=>path.centroid(d)[0]).attr('y',d=>path.centroid(d)[1])
-      .attr('class',d=>strongSites[numericToCode[String(Number(d.id))]]?'geo-label national':'geo-label')
-      .text(d=>numericToCode[String(Number(d.id))]);
+  countrySelect.addEventListener("change", () => {
+    const code = countrySelect.value;
+    citySelect.innerHTML = "";
+    if (!code) {
+      citySelect.disabled = true;
+      citySelect.append(new Option("Select a country first", ""));
+      note.textContent = "Dedicated national portals open their local CasaStudent site.";
+      return;
+    }
+    if (nationalPortals[code]) {
+      citySelect.disabled = true;
+      citySelect.append(new Option("Opens the national CasaStudent portal", ""));
+      note.textContent = `${countryNames[code]} has a dedicated national CasaStudent website.`;
+      return;
+    }
+    citySelect.disabled = false;
+    citySelect.append(new Option("All university cities", ""));
+    (countryCities[code] || []).forEach((city) => citySelect.append(new Option(city, city)));
+    note.textContent = `${countryNames[code]} is hosted directly on CasaStudent.eu.`;
+  });
 
-    const badges=features.filter(d=>strongSites[numericToCode[String(Number(d.id))]]);
-    svg.append('g').attr('class','national-badges').selectAll('circle').data(badges).join('circle')
-      .attr('cx',d=>path.centroid(d)[0]+13).attr('cy',d=>path.centroid(d)[1]-13).attr('r',5.5).attr('class','national-badge');
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const code = countrySelect.value;
+    if (!code) {
+      countrySelect.focus();
+      return;
+    }
+    window.location.href = destinationHref(code, citySelect.value);
+  });
+}
 
-    container.querySelectorAll('.country').forEach(el=>el.setAttribute('aria-hidden','true'));
-    container.prepend(svg.node());
-    container.classList.add('geo-ready');
-  }catch(error){
-    console.warn('CasaStudent Europe map fallback',error);
+function renderPortalGrid() {
+  const grid = document.querySelector("#portalGrid");
+  if (!grid) return;
+  portalOrder.forEach((code) => {
+    const link = document.createElement("a");
+    link.className = "portal-card";
+    link.href = nationalPortals[code];
+    link.innerHTML = `<span class="flag" aria-hidden="true">${countryFlags[code]}</span><strong>${countryNames[code]}</strong><small>Dedicated national portal</small><b aria-hidden="true">↗</b>`;
+    grid.appendChild(link);
+  });
+}
+
+function renderCountryGrid() {
+  const grid = document.querySelector("#countryGrid");
+  if (!grid) return;
+  europeanOrder.forEach((code) => {
+    const link = document.createElement("a");
+    link.className = "country-card";
+    link.href = destinationHref(code);
+    link.innerHTML = `<span class="flag" aria-hidden="true">${countryFlags[code]}</span><strong>${countryNames[code]}</strong><small>${citySummary(code)}</small><b aria-hidden="true">›</b>`;
+    grid.appendChild(link);
+  });
+}
+
+function renderFooterNetwork() {
+  const network = document.querySelector("#footerNetwork");
+  if (!network) return;
+  const links = [
+    { code: "EU", name: "Europe", flag: "🇪🇺", url: "index.html", current: true },
+    ...portalOrder.map((code) => ({ code, name: countryNames[code], flag: countryFlags[code], url: nationalPortals[code] }))
+  ];
+  links.forEach((item) => {
+    const link = document.createElement("a");
+    link.href = item.url;
+    if (item.current) link.setAttribute("aria-current", "page");
+    link.innerHTML = `<span aria-hidden="true">${item.flag}</span><span>${item.name}</span>${item.current ? "" : '<span aria-hidden="true">↗</span>'}`;
+    network.appendChild(link);
+  });
+}
+
+function renderCountryPage() {
+  const title = document.querySelector("#countryTitle");
+  const cards = document.querySelector("#cityCards");
+  if (!title || !cards) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("country");
+  const selectedCity = params.get("city");
+  if (!code || !countryNames[code]) {
+    title.textContent = "Choose a European destination";
+    document.querySelector("#countryIntro").textContent = "Return to the European map and select a country.";
+    cards.innerHTML = '<div class="empty-card"><strong>No destination selected.</strong><br><a href="index.html#map">Open the European map</a></div>';
+    return;
   }
+  if (nationalPortals[code]) {
+    window.location.replace(nationalPortals[code]);
+    return;
+  }
+
+  const country = countryNames[code];
+  const intro = document.querySelector("#countryIntro");
+  const breadcrumb = document.querySelector("#breadcrumbCountry");
+  const heading = document.querySelector("#cityHeading");
+  document.title = `${selectedCity ? `${selectedCity}, ` : ""}${country} — CasaStudent Europe`;
+  breadcrumb.textContent = selectedCity ? `${country} · ${selectedCity}` : country;
+  title.textContent = selectedCity ? `Student housing in ${selectedCity}` : `Student housing in ${country}`;
+  intro.textContent = selectedCity
+    ? `${selectedCity} is part of the ${country} destination on CasaStudent.eu. Explore the country's university markets below.`
+    : `Explore the main university destinations in ${country}. This country is hosted directly on CasaStudent.eu.`;
+  heading.textContent = selectedCity ? `More cities in ${country}` : `Choose a city in ${country}`;
+
+  const cities = countryCities[code] || [];
+  if (!cities.length) {
+    cards.innerHTML = '<div class="empty-card"><strong>Coming soon</strong><br>This destination is already part of CasaStudent Europe and will grow with the marketplace.</div>';
+    return;
+  }
+  cities.forEach((city) => {
+    const link = document.createElement("a");
+    link.className = "city-card";
+    link.href = destinationHref(code, city);
+    if (city === selectedCity) link.setAttribute("aria-current", "page");
+    link.innerHTML = `<span class="city-icon" aria-hidden="true">⌖</span><strong>${city}</strong><span>Student housing and Erasmus accommodation</span><b aria-hidden="true">›</b>`;
+    cards.appendChild(link);
+  });
 }
 
-renderEuropeMap();
-window.addEventListener('resize',()=>{const map=document.querySelector('.europe-map');if(map?.classList.contains('geo-ready')){clearTimeout(window.__euMapResize);window.__euMapResize=setTimeout(()=>{const svg=map.querySelector('svg');const tooltip=map.querySelector('.map-tooltip');svg?.remove();tooltip?.remove();map.classList.remove('geo-ready');renderEuropeMap()},180)}});
-const illustratedMap=document.querySelector('.illustrated-europe-map img');if(illustratedMap){illustratedMap.src='assets/img/europe-map.jpg';}
-window.CasaStudentEU={countryNames,countryCities,strongSites};
+configureMenu();
+configureMap();
+configureSearch();
+renderPortalGrid();
+renderCountryGrid();
+renderFooterNetwork();
+renderCountryPage();
+
+window.CasaStudentEU = { nationalPortals, countryNames, countryCities };

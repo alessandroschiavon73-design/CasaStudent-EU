@@ -76,4 +76,5 @@ async function renderEuropeMap(){
 
 renderEuropeMap();
 window.addEventListener('resize',()=>{const map=document.querySelector('.europe-map');if(map?.classList.contains('geo-ready')){clearTimeout(window.__euMapResize);window.__euMapResize=setTimeout(()=>{const svg=map.querySelector('svg');const tooltip=map.querySelector('.map-tooltip');svg?.remove();tooltip?.remove();map.classList.remove('geo-ready');renderEuropeMap()},180)}});
+const illustratedMap=document.querySelector('.illustrated-europe-map img');if(illustratedMap){illustratedMap.src='assets/img/europe-map.jpg';}
 window.CasaStudentEU={countryNames,countryCities,strongSites};

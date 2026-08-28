@@ -42,6 +42,14 @@ const countryFlags = {
   BG: "🇧🇬", GR: "🇬🇷", EE: "🇪🇪", LV: "🇱🇻", LT: "🇱🇹"
 };
 
+const countryPhotoCities = {
+  IE: "Dublin", UK: "London", PT: "Lisbon", ES: "Barcelona", FR: "Paris",
+  BE: "Brussels", NL: "Amsterdam", DE: "Berlin", DK: "Copenhagen", NO: "Bergen",
+  SE: "Stockholm", FI: "Helsinki", PL: "Kraków", CZ: "Prague", AT: "Vienna",
+  CH: "Zurich", IT: "Rome", HU: "Budapest", SK: "Bratislava", RO: "Bucharest",
+  BG: "Sofia", GR: "Athens", EE: "Tallinn", LV: "Riga", LT: "Vilnius"
+};
+
 const countryCities = {
   IE: ["Dublin", "Cork", "Galway", "Limerick"],
   UK: ["London", "Manchester", "Edinburgh", "Bristol", "Leeds"],
@@ -161,10 +169,13 @@ function renderPortalGrid() {
   if (!grid) return;
   portalOrder.forEach((code) => {
     const link = document.createElement("a");
-    link.className = "portal-card";
+    link.className = "portal-card destination-card-photo";
     link.href = nationalPortals[code];
-    link.innerHTML = `<span class="flag" aria-hidden="true">${countryFlags[code]}</span><strong>${countryNames[code]}</strong><small>Dedicated national portal</small><b aria-hidden="true">↗</b>`;
+    const photoCity = countryPhotoCities[code];
+    link.innerHTML = `<span class="destination-photo"><img loading="lazy" decoding="async" alt=""><span class="destination-photo-shade"></span><span class="flag" aria-hidden="true">${countryFlags[code]}</span><small class="destination-photo-credit"></small></span><span class="destination-card-copy"><strong>${countryNames[code]}</strong><small>Dedicated national portal</small></span><b aria-hidden="true">↗</b>`;
     grid.appendChild(link);
+    const img = link.querySelector(".destination-photo img");
+    if (img) loadCityPhoto(img, photoCity, countryNames[code]);
   });
 }
 
@@ -173,10 +184,13 @@ function renderCountryGrid() {
   if (!grid) return;
   europeanOrder.forEach((code) => {
     const link = document.createElement("a");
-    link.className = "country-card";
+    link.className = "country-card destination-card-photo";
     link.href = destinationHref(code);
-    link.innerHTML = `<span class="flag" aria-hidden="true">${countryFlags[code]}</span><strong>${countryNames[code]}</strong><small>${citySummary(code)}</small><b aria-hidden="true">›</b>`;
+    const photoCity = countryPhotoCities[code];
+    link.innerHTML = `<span class="destination-photo"><img loading="lazy" decoding="async" alt=""><span class="destination-photo-shade"></span><span class="flag" aria-hidden="true">${countryFlags[code]}</span><small class="destination-photo-credit"></small></span><span class="destination-card-copy"><strong>${countryNames[code]}</strong><small>${citySummary(code)}</small></span><b aria-hidden="true">›</b>`;
     grid.appendChild(link);
+    const img = link.querySelector(".destination-photo img");
+    if (img) loadCityPhoto(img, photoCity, countryNames[code]);
   });
 }
 
@@ -197,8 +211,9 @@ function renderFooterNetwork() {
 }
 
 async function loadCityPhoto(img, city, country) {
+  const photo = img.closest(".city-photo, .destination-photo");
   const fallback = () => {
-    img.closest(".city-photo")?.classList.add("photo-unavailable");
+    photo?.classList.add("photo-unavailable");
   };
   try {
     const search = `${city} ${country}`;
@@ -214,10 +229,9 @@ async function loadCityPhoto(img, city, country) {
     if (!page?.thumbnail?.source) return fallback();
     img.src = page.thumbnail.source;
     img.alt = `${city}, ${country}`;
-    const photo = img.closest(".city-photo");
     if (photo) {
       photo.classList.add("loaded");
-      const credit = photo.querySelector(".city-photo-credit");
+      const credit = photo.querySelector(".city-photo-credit, .destination-photo-credit");
       if (credit) credit.textContent = "Wikipedia / Wikimedia";
     }
   } catch (error) {

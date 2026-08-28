@@ -263,6 +263,25 @@ function renderCountryPage() {
   const breadcrumb = document.querySelector("#breadcrumbCountry");
   const heading = document.querySelector("#cityHeading");
   document.title = `${selectedCity ? `${selectedCity}, ` : ""}${country} — CasaStudent Europe`;
+  const description = selectedCity
+    ? `Discover student housing, university areas and student life in ${selectedCity}, ${country}.`
+    : `Explore student housing and the main university cities in ${country} on CasaStudent Europe.`;
+  let descriptionMeta = document.querySelector('meta[name="description"]');
+  if (!descriptionMeta) {
+    descriptionMeta = document.createElement("meta");
+    descriptionMeta.name = "description";
+    document.head.appendChild(descriptionMeta);
+  }
+  descriptionMeta.content = description;
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    document.head.appendChild(canonical);
+  }
+  const canonicalParams = new URLSearchParams({ country: code });
+  if (selectedCity) canonicalParams.set("city", selectedCity);
+  canonical.href = `https://casastudent.eu/country.html?${canonicalParams.toString()}`;
   breadcrumb.textContent = selectedCity ? `${country} · ${selectedCity}` : country;
   title.textContent = selectedCity ? `Student housing in ${selectedCity}` : `Student housing in ${country}`;
   intro.textContent = selectedCity

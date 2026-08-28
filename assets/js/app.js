@@ -196,6 +196,35 @@ function renderFooterNetwork() {
   });
 }
 
+async function loadCityPhoto(img, city, country) {
+  const fallback = () => {
+    img.closest(".city-photo")?.classList.add("photo-unavailable");
+  };
+  try {
+    const search = `${city} ${country}`;
+    const endpoint = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(search)}&gsrlimit=5&prop=pageimages|info&piprop=thumbnail&pithumbsize=700&inprop=url&format=json&origin=*`;
+    const response = await fetch(endpoint, { mode: "cors" });
+    if (!response.ok) throw new Error("photo lookup failed");
+    const data = await response.json();
+    const pages = Object.values(data.query?.pages || {});
+    const cityLower = city.toLowerCase();
+    const page = pages.find((item) => item.thumbnail?.source && item.title?.toLowerCase() === cityLower)
+      || pages.find((item) => item.thumbnail?.source && item.title?.toLowerCase().includes(cityLower))
+      || pages.find((item) => item.thumbnail?.source);
+    if (!page?.thumbnail?.source) return fallback();
+    img.src = page.thumbnail.source;
+    img.alt = `${city}, ${country}`;
+    const photo = img.closest(".city-photo");
+    if (photo) {
+      photo.classList.add("loaded");
+      const credit = photo.querySelector(".city-photo-credit");
+      if (credit) credit.textContent = "Wikipedia / Wikimedia";
+    }
+  } catch (error) {
+    fallback();
+  }
+}
+
 function renderCountryPage() {
   const title = document.querySelector("#countryTitle");
   const cards = document.querySelector("#cityCards");
@@ -234,11 +263,13 @@ function renderCountryPage() {
   }
   cities.forEach((city) => {
     const link = document.createElement("a");
-    link.className = "city-card";
+    link.className = "city-card city-card-photo";
     link.href = destinationHref(code, city);
     if (city === selectedCity) link.setAttribute("aria-current", "page");
-    link.innerHTML = `<span class="city-icon" aria-hidden="true">⌖</span><strong>${city}</strong><span>Student housing and Erasmus accommodation</span><b aria-hidden="true">›</b>`;
+    link.innerHTML = `<span class="city-photo"><img loading="lazy" decoding="async" alt=""><span class="city-photo-shade"></span><small class="city-photo-credit"></small></span><span class="city-card-copy"><strong>${city}</strong><span>Student housing and Erasmus accommodation</span></span><b aria-hidden="true">›</b>`;
     cards.appendChild(link);
+    const img = link.querySelector(".city-photo img");
+    if (img) loadCityPhoto(img, city, country);
   });
 }
 

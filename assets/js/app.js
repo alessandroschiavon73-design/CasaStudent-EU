@@ -198,7 +198,7 @@ function renderFooterNetwork() {
   const network = document.querySelector("#footerNetwork");
   if (!network) return;
   const links = [
-    { code: "EU", name: "Europe", flag: "🇪🇺", url: "index.html", current: true },
+    { code: "EU", name: "Europe", flag: "🇪🇺", url: "https://casastudent.eu/", current: true },
     ...portalOrder.map((code) => ({ code, name: countryNames[code], flag: countryFlags[code], url: nationalPortals[code] }))
   ];
   links.forEach((item) => {

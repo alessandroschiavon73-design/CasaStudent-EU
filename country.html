@@ -20,7 +20,7 @@
     </div>
   </header>
   <main>
-    <div class="breadcrumb"><div class="container"><a href="index.html">Europe</a><span>›</span><span id="breadcrumbCountry">Destination</span></div></div>
+    <div class="breadcrumb"><div class="container"><a href="index.html">Europe</a><span>›</span><span id="breadcrumbFlag" aria-hidden="true"></span><span id="breadcrumbCountry">Destination</span></div></div>
     <section class="country-hero">
       <div class="container country-hero-grid">
         <div><span class="kicker">CasaStudent Europe destination</span><h1 id="countryTitle">Student housing in Europe</h1><p id="countryIntro">Choose a university city to continue.</p></div>
@@ -47,6 +47,18 @@
     </div>
   </footer>
   <script src="assets/js/app.js?v=20260828-country-photos"></script>
+  <script>
+    (() => {
+      const flags = {
+        IE:"🇮🇪", UK:"🇬🇧", PT:"🇵🇹", BE:"🇧🇪", NL:"🇳🇱", DK:"🇩🇰", NO:"🇳🇴",
+        SE:"🇸🇪", FI:"🇫🇮", CZ:"🇨🇿", AT:"🇦🇹", CH:"🇨🇭", HU:"🇭🇺", SK:"🇸🇰",
+        RO:"🇷🇴", BG:"🇧🇬", GR:"🇬🇷", EE:"🇪🇪", LV:"🇱🇻", LT:"🇱🇹"
+      };
+      const code = new URLSearchParams(window.location.search).get("country");
+      const flag = document.querySelector("#breadcrumbFlag");
+      if (flag && flags[code]) flag.textContent = flags[code];
+    })();
+  </script>
   <script src="assets/js/city-visuals.js?v=20260828"></script>
 </body>
 </html>

@@ -412,6 +412,10 @@ window.CasaStudentEU = { nationalPortals, countryNames, countryCities };
     renderDualFooter();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applyPortalNavigation);
-  else applyPortalNavigation();
+  function applyAfterBranding() {
+    window.setTimeout(applyPortalNavigation, 0);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applyAfterBranding);
+  else applyAfterBranding();
 })();

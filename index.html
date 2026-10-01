@@ -29,6 +29,12 @@
         mask-image:radial-gradient(ellipse 96% 96% at 50% 50%,#000 54%,rgba(0,0,0,.90) 70%,rgba(0,0,0,.48) 84%,transparent 100%);
       }
     }
+  
+    .network-stats{background:#111827;color:#fff;padding:22px 0}
+    .network-stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;text-align:center}
+    .network-stat strong{display:block;color:#ffc400;font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.1}
+    .network-stat span{display:block;margin-top:6px;color:#e5e7eb;font-size:14px}
+    @media(max-width:600px){.network-stats-grid{grid-template-columns:1fr;gap:14px}.network-stat{display:flex;align-items:baseline;justify-content:center;gap:10px}.network-stat span{margin:0}}
   </style>
 </head>
 <body>
@@ -83,6 +89,14 @@
       </div>
     </section>
 
+
+    <section class="network-stats" aria-label="CasaStudent network coverage">
+      <div class="container network-stats-grid">
+        <div class="network-stat"><strong id="network-country-count">50</strong><span>European countries</span></div>
+        <div class="network-stat"><strong id="network-city-count">—</strong><span>University cities in one database</span></div>
+        <div class="network-stat"><strong>5</strong><span>Dedicated national portals</span></div>
+      </div>
+    </section>
     <section class="map-section" id="map">
       <div class="container">
         <div class="section-heading map-heading">
@@ -178,6 +192,8 @@
       <div class="footer-bottom"><span>© 2026 CasaStudent</span><span>Europe · casastudent.eu</span></div>
     </div>
   </footer>
-  <script src="assets/js/app.js?v=20260828-footer-links"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js?v=20261001-europe-database"></script>
+  <script src="assets/js/analytics.js"></script>
 </body>
 </html>

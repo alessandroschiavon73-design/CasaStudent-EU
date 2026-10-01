@@ -1,0 +1,1 @@
+window.STUDENTBNB_CONFIG = Object.freeze({appName:"CasaStudent",countryCode:"EU",countryName:"Europe",locale:"en-EU",currency:"EUR",domain:"casastudent.eu",supabaseUrl:"https://etyvaugscofodkhklqqz.supabase.co",supabasePublishableKey:"sb_publishable_MJiby1pof0ghYnw1UMx-jQ_bpQKyd0L",unifiedDatabase:true});

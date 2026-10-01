@@ -78,6 +78,14 @@ const countryOrder = [
   "SE", "FI", "PL", "CZ", "AT", "CH", "IT", "HU", "SK", "RO",
   "BG", "GR", "EE", "LV", "LT"
 ];
+/* Extra European markets backed by the shared CasaStudent database. */
+const extraMarketData = {"names":{"AL":"Albania","AD":"Andorra","BY":"Belarus","BA":"Bosnia and Herzegovina","HR":"Croatia","CY":"Cyprus","IS":"Iceland","XK":"Kosovo","LU":"Luxembourg","MT":"Malta","MD":"Moldova","MC":"Monaco","ME":"Montenegro","MK":"North Macedonia","RS":"Serbia","SI":"Slovenia","TR":"Türkiye","UA":"Ukraine","VA":"Vatican City","SM":"San Marino","LI":"Liechtenstein","RU":"Russia","AM":"Armenia","AZ":"Azerbaijan","GE":"Georgia"},"flags":{"AL":"🇦🇱","AD":"🇦🇩","BY":"🇧🇾","BA":"🇧🇦","HR":"🇭🇷","CY":"🇨🇾","IS":"🇮🇸","XK":"🇽🇰","LU":"🇱🇺","MT":"🇲🇹","MD":"🇲🇩","MC":"🇲🇨","ME":"🇲🇪","MK":"🇲🇰","RS":"🇷🇸","SI":"🇸🇮","TR":"🇹🇷","UA":"🇺🇦","VA":"🇻🇦","SM":"🇸🇲","LI":"🇱🇮","RU":"🇷🇺","AM":"🇦🇲","AZ":"🇦🇿","GE":"🇬🇪"},"photo":{"AL":"Tirana","AD":"Andorra la Vella","BY":"Minsk","BA":"Sarajevo","HR":"Zagreb","CY":"Nicosia","IS":"Reykjavík","XK":"Pristina","LU":"Luxembourg City","MT":"Msida","MD":"Chișinău","MC":"Monaco","ME":"Podgorica","MK":"Skopje","RS":"Belgrade","SI":"Ljubljana","TR":"Istanbul","UA":"Kyiv","VA":"Vatican City","SM":"San Marino","LI":"Vaduz","RU":"Moscow","AM":"Yerevan","AZ":"Baku","GE":"Tbilisi"},"cities":{"AL":["Tirana","Durrës","Shkodër"],"AD":["Andorra la Vella"],"BY":["Minsk","Brest","Gomel"],"BA":["Sarajevo","Banja Luka","Mostar"],"HR":["Zagreb","Split","Rijeka","Osijek"],"CY":["Nicosia","Limassol","Larnaca"],"IS":["Reykjavík","Akureyri"],"XK":["Pristina","Prizren"],"LU":["Luxembourg City","Esch-sur-Alzette"],"MT":["Msida","Valletta"],"MD":["Chișinău","Bălți"],"MC":["Monaco"],"ME":["Podgorica","Cetinje"],"MK":["Skopje","Bitola"],"RS":["Belgrade","Novi Sad","Niš"],"SI":["Ljubljana","Maribor"],"TR":["Istanbul","Ankara","İzmir","Eskişehir"],"UA":["Kyiv","Lviv","Kharkiv","Odesa"],"VA":["Vatican City"],"SM":["San Marino"],"LI":["Vaduz"],"RU":["Moscow","Saint Petersburg","Kazan"],"AM":["Yerevan","Gyumri"],"AZ":["Baku","Ganja"],"GE":["Tbilisi","Kutaisi","Batumi"]},"order":["AL","AD","BY","BA","HR","CY","IS","XK","LU","MT","MD","MC","ME","MK","RS","SI","TR","UA","VA","SM","LI","RU","AM","AZ","GE"]};
+Object.assign(countryNames, extraMarketData.names);
+Object.assign(countryFlags, extraMarketData.flags);
+Object.assign(countryPhotoCities, extraMarketData.photo);
+Object.assign(countryCities, extraMarketData.cities);
+countryOrder.push(...extraMarketData.order);
+
 const portalOrder = ["IT", "ES", "FR", "DE", "PL"];
 const europeanOrder = countryOrder.filter((code) => !nationalPortals[code]);
 
@@ -118,6 +126,21 @@ function configureMap() {
   });
 }
 
+async function fetchDatabaseRows(table,query){
+  const cfg=window.STUDENTBNB_CONFIG||{};
+  if(!cfg.supabaseUrl||!cfg.supabasePublishableKey)return null;
+  try{const response=await fetch(`${cfg.supabaseUrl}`+`/rest/v1/${table}?${query}`,{headers:{apikey:cfg.supabasePublishableKey,Authorization:`Bearer ${cfg.supabasePublishableKey}`}});if(!response.ok)return null;const rows=await response.json();return Array.isArray(rows)?rows:null}catch(_){return null}
+}
+async function loadDatabaseCities(code){
+  const rows=await fetchDatabaseRows("cities",`select=slug,name&country_code=eq.${encodeURIComponent(code)}&active=eq.true&order=name.asc`);
+  return rows?.length?rows:null;
+}
+async function loadNetworkStats(){
+  const [countries,cities]=await Promise.all([fetchDatabaseRows("countries","select=code&active=eq.true"),fetchDatabaseRows("cities","select=id&active=eq.true")]);
+  if(countries){const count=countries.filter(row=>row.code!=="EU").length;const node=document.querySelector("#network-country-count");if(node)node.textContent=String(count)}
+  const cityNode=document.querySelector("#network-city-count");if(cityNode&&cities)cityNode.textContent=String(cities.length);
+}
+
 function configureSearch() {
   const form = document.querySelector("#destination-search");
   const countrySelect = document.querySelector("#countrySelect");
@@ -132,7 +155,7 @@ function configureSearch() {
     countrySelect.appendChild(option);
   });
 
-  countrySelect.addEventListener("change", () => {
+  countrySelect.addEventListener("change", async () => {
     const code = countrySelect.value;
     citySelect.innerHTML = "";
     if (!code) {
@@ -149,6 +172,8 @@ function configureSearch() {
     }
     citySelect.disabled = false;
     citySelect.append(new Option("All university cities", ""));
+    const databaseCities=await loadDatabaseCities(code);
+    if(databaseCities) countryCities[code]=databaseCities.map(city=>city.name);
     (countryCities[code] || []).forEach((city) => citySelect.append(new Option(city, city)));
     note.textContent = `${countryNames[code]} is hosted directly on CasaStudent.eu.`;
   });
@@ -239,7 +264,7 @@ async function loadCityPhoto(img, city, country) {
   }
 }
 
-function renderCountryPage() {
+async function renderCountryPage() {
   const title = document.querySelector("#countryTitle");
   const cards = document.querySelector("#cityCards");
   if (!title || !cards) return;
@@ -289,6 +314,8 @@ function renderCountryPage() {
     : `Explore the main university destinations in ${country}. This country is hosted directly on CasaStudent.eu.`;
   heading.textContent = selectedCity ? `More cities in ${country}` : `Choose a city in ${country}`;
 
+  const databaseCities=await loadDatabaseCities(code);
+  if(databaseCities) countryCities[code]=databaseCities.map(city=>city.name);
   const cities = countryCities[code] || [];
   if (!cities.length) {
     cards.innerHTML = '<div class="empty-card"><strong>Coming soon</strong><br>This destination is already part of CasaStudent Europe and will grow with the marketplace.</div>';
@@ -313,6 +340,7 @@ renderPortalGrid();
 renderCountryGrid();
 renderFooterNetwork();
 renderCountryPage();
+loadNetworkStats();
 
 window.CasaStudentEU = { nationalPortals, countryNames, countryCities };
 
